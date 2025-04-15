@@ -73,14 +73,18 @@ function fft(y: number[], sr: number, nfft?: number): { freq: number[]; mag: num
 function ifft(re: number[], im: number[], nfft: number): number[] {
   const N = nfft;
   const y = new Array(N).fill(0);
+
   for (let n = 0; n < N; n++) {
     let sum = 0;
     for (let k = 0; k < re.length; k++) {
       const angle = (2 * Math.PI * k * n) / N;
-      sum += (re[k] * Math.cos(angle) - im[k] * Math.sin(angle)) / N * 2; // *2 因为只用了一半谱
+      let scale = 2;
+      if (k === 0 || (N % 2 === 0 && k === N / 2)) scale = 1; // DC 和 Nyquist 不翻倍
+      sum += scale * (re[k] * Math.cos(angle) - im[k] * Math.sin(angle)) / N;
     }
     y[n] = sum;
   }
+
   return y;
 }
 
